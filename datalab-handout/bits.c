@@ -205,7 +205,12 @@ int tmin(void)
  */
 int isTmax(int x)
 {
-  return (!((x + 1) ^ (~x)));
+  int result;
+  int check_first_bit = 1;
+  check_first_bit = check_first_bit << 31;
+  result = ((x + 1) ^ (~x)) | (x & check_first_bit);
+  result = !result;
+  return result;
 }
 /*
  * allOddBits - return 1 if all odd-numbered bits in word set to 1
@@ -219,7 +224,7 @@ int allOddBits(int x)
 {
   int temp = 170;
   temp = temp | (temp << 8) | (temp << 16) | (temp << 24);
-  return (!(temp & x) ^ temp);
+  return !((temp & x) ^ temp);
 }
 /*
  * negate - return -x
@@ -244,7 +249,12 @@ int negate(int x)
  */
 int isAsciiDigit(int x)
 {
-  return 2;
+  int min = 48;
+  int max = 57;
+  int result;
+  result = (~((~(x + (~min + 1))) & (~(max + (~x + 1))))) | (x);
+  result = (result >> 31) + 1;
+  return result;
 }
 /*
  * conditional - same as x ? y : z
@@ -268,10 +278,9 @@ int conditional(int x, int y, int z)
  */
 int isLessOrEqual(int x, int y)
 {
-  int check_first_bit = 1;
-  check_first_bit << 31;
-  int result = (check_first_bit & (y + (~x + 1)));
-  result = ((result >> 31) + 1);
+  int result;
+  result = ((~(y + (~x + 1))) & (~(x ^ y))) | ((~y) & (x));
+  result = !((result >> 31) + 1);
   return result;
 }
 // 4
@@ -285,7 +294,10 @@ int isLessOrEqual(int x, int y)
  */
 int logicalNeg(int x)
 {
-  return 2;
+  int result = (~x + 1) ^ x;
+  result = result | x;
+  result = ((result >> 31) + 1);
+  return result;
 }
 /* howManyBits - return the minimum number of bits required to represent x in
  *             two's complement
