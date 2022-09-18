@@ -313,7 +313,47 @@ int logicalNeg(int x)
  */
 int howManyBits(int x)
 {
-  return 0;
+  int first_bit = x >> 31;
+  int temp = 1;
+  int result = 1;
+  int abs = (first_bit & ((~x) ^ x)) ^ x;
+  abs = (abs) | (abs >> 1);
+  abs = (abs) | (abs >> 2);
+  abs = (abs) | (abs >> 4);
+  abs = (abs) | (abs >> 8);
+  abs = (abs) | (abs >> 16);
+  result = result + (abs & temp);
+  result = result + ((abs >> 1) & temp);
+  result = result + ((abs >> 2) & temp);
+  result = result + ((abs >> 3) & temp);
+  result = result + ((abs >> 4) & temp);
+  result = result + ((abs >> 5) & temp);
+  result = result + ((abs >> 6) & temp);
+  result = result + ((abs >> 7) & temp);
+  result = result + ((abs >> 8) & temp);
+  result = result + ((abs >> 9) & temp);
+  result = result + ((abs >> 10) & temp);
+  result = result + ((abs >> 11) & temp);
+  result = result + ((abs >> 12) & temp);
+  result = result + ((abs >> 13) & temp);
+  result = result + ((abs >> 14) & temp);
+  result = result + ((abs >> 15) & temp);
+  result = result + ((abs >> 16) & temp);
+  result = result + ((abs >> 17) & temp);
+  result = result + ((abs >> 18) & temp);
+  result = result + ((abs >> 19) & temp);
+  result = result + ((abs >> 20) & temp);
+  result = result + ((abs >> 21) & temp);
+  result = result + ((abs >> 22) & temp);
+  result = result + ((abs >> 23) & temp);
+  result = result + ((abs >> 24) & temp);
+  result = result + ((abs >> 25) & temp);
+  result = result + ((abs >> 26) & temp);
+  result = result + ((abs >> 27) & temp);
+  result = result + ((abs >> 28) & temp);
+  result = result + ((abs >> 29) & temp);
+  result = result + ((abs >> 30) & temp);
+  return result;
 }
 // float
 /*
