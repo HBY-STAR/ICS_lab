@@ -217,7 +217,9 @@ int isTmax(int x)
  */
 int allOddBits(int x)
 {
-  return 2;
+  int temp = 170;
+  temp = temp | (temp << 8) | (temp << 16) | (temp << 24);
+  return (!(temp & x) ^ temp);
 }
 /*
  * negate - return -x
@@ -228,7 +230,7 @@ int allOddBits(int x)
  */
 int negate(int x)
 {
-  return 2;
+  return (~x + 1);
 }
 // 3
 /*
@@ -253,7 +255,9 @@ int isAsciiDigit(int x)
  */
 int conditional(int x, int y, int z)
 {
-  return 2;
+  int turn = !(!x);
+  turn = ~turn + 1;
+  return ((turn & (y ^ z)) ^ z);
 }
 /*
  * isLessOrEqual - if x <= y  then return 1, else return 0
