@@ -314,7 +314,7 @@ int logicalNeg(int x)
 int howManyBits(int x)
 {
   int first_bit = x >> 31;
-  int temp = 3;
+  int temp = 7;
   int result = 1;
   int abs = (first_bit & ((~x) ^ x)) ^ x;
   abs = (abs) | (abs >> 1);
@@ -322,37 +322,27 @@ int howManyBits(int x)
   abs = (abs) | (abs >> 4);
   abs = (abs) | (abs >> 8);
   abs = (abs) | (abs >> 16);
-  result = result + (((abs & temp) + 1) >> 1);
-  abs = abs >> 2;
-  result = result + (((abs & temp) + 1) >> 1);
-  abs = abs >> 2;
-  result = result + (((abs & temp) + 1) >> 1);
-  abs = abs >> 2;
-  result = result + (((abs & temp) + 1) >> 1);
-  abs = abs >> 2;
-  result = result + (((abs & temp) + 1) >> 1);
-  abs = abs >> 2;
-  result = result + (((abs & temp) + 1) >> 1);
-  abs = abs >> 2;
-  result = result + (((abs & temp) + 1) >> 1);
-  abs = abs >> 2;
-  result = result + (((abs & temp) + 1) >> 1);
-  abs = abs >> 2;
-  result = result + (((abs & temp) + 1) >> 1);
-  abs = abs >> 2;
-  result = result + (((abs & temp) + 1) >> 1);
-  abs = abs >> 2;
-  result = result + (((abs & temp) + 1) >> 1);
-  abs = abs >> 2;
-  result = result + (((abs & temp) + 1) >> 1);
-  abs = abs >> 2;
-  result = result + (((abs & temp) + 1) >> 1);
-  abs = abs >> 2;
-  result = result + (((abs & temp) + 1) >> 1);
-  abs = abs >> 2;
-  result = result + (((abs & temp) + 1) >> 1);
-  abs = abs >> 2;
-  result = result + (((abs & temp) + 1) >> 1);
+  result = result + ((((abs & temp) + 5) >> 2) & abs);
+  abs = abs >> 3;
+  result = result + ((((abs & temp) + 5) >> 2) & abs);
+  abs = abs >> 3;
+  result = result + ((((abs & temp) + 5) >> 2) & abs);
+  abs = abs >> 3;
+  result = result + ((((abs & temp) + 5) >> 2) & abs);
+  abs = abs >> 3;
+  result = result + ((((abs & temp) + 5) >> 2) & abs);
+  abs = abs >> 3;
+  result = result + ((((abs & temp) + 5) >> 2) & abs);
+  abs = abs >> 3;
+  result = result + ((((abs & temp) + 5) >> 2) & abs);
+  abs = abs >> 3;
+  result = result + ((((abs & temp) + 5) >> 2) & abs);
+  abs = abs >> 3;
+  result = result + ((((abs & temp) + 5) >> 2) & abs);
+  abs = abs >> 3;
+  result = result + ((((abs & temp) + 5) >> 2) & abs);
+  abs = abs >> 3;
+  result = result + ((((abs & temp) + 5) >> 2) & abs);
   return result;
 }
 // float
