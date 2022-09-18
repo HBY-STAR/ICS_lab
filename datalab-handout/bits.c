@@ -268,7 +268,11 @@ int conditional(int x, int y, int z)
  */
 int isLessOrEqual(int x, int y)
 {
-  return 2;
+  int check_first_bit = 1;
+  check_first_bit << 31;
+  int result = (check_first_bit & (y + (~x + 1)));
+  result = ((result >> 31) + 1);
+  return result;
 }
 // 4
 /*
