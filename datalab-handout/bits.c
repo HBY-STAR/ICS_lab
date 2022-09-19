@@ -479,33 +479,26 @@ int floatFloat2Int(unsigned uf)
  */
 unsigned floatPower2(int x)
 {
-  int _s_ = -2147483648;
-  _s_ = _s_ & x;
-  int all_bit = -1;
-  int abs = (all_bit & ((~x + 1) ^ x)) ^ x;
-  int _E_ = 0;
-  int i = abs;
-  while (i)
+  // yibianguo!!!
+  int _E_ = x;
+  int INF = 2139095040;
+  int _9_bit = 8388608;
+  if (_E_ > 128) //+INF
   {
-    i = i >> 1;
-    _E_ = _E_ + 1;
+    return INF;
   }
-  int exp = _E_ + 127;
-  exp = exp >> 23;
-  // int _10_to_32_bits = 8388607;
-  int cut_bit = -2147483648;
-  cut_bit = cut_bit >> (32 - _E_); // to the _E_ fisrt bit
-  int frac = (~cut_bit) & x;
-  if (_E_ <= 24)
+  else if (_E_ < -150) // denorm
   {
-    frac = (frac << (24 - _E_));
+    return 0;
   }
-  else
+  else if ((_E_ >= -150) && (_E_ < -127)) // unnor
   {
-    frac = (frac >> (_E_ - 24));
+    return (_9_bit >> (-127 - _E_));
   }
-  int result = _s_ | exp | frac;
-  return result;
+  else // nor
+  {
+    return ((_E_ + 127) << 23);
+  }
 }
 /*
 unsigned floatPower2(int x)
