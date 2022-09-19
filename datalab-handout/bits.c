@@ -179,8 +179,19 @@ NOTES:
  *   Max ops: 14
  *   Rating: 1
  */
+
+//代码托管在GitHub上，可访问：https://github.com/HBY-STAR/ICS_lab/tree/master/datalab-handout
+
 int bitXor(int x, int y)
 {
+  /*
+  思路：
+  要用~和&运算符实现^运算，可以先通过x&y运算找出
+  x与y同时为1的位；然后再通过~x&~y运算找出x与y的
+  同时为0的位；而^运算只是相同位赋0而不同位赋1，
+  故最后只需要让上面两个运算找到的位都为0，而其他
+  位都为1，即让两个运算都取~之后再取&。
+  */
   return (~(x & y)) & (~((~x) & (~y)));
 }
 /*
@@ -191,6 +202,11 @@ int bitXor(int x, int y)
  */
 int tmin(void)
 {
+  /*
+  思路：
+  补码int型的最小值即让最高位取1而其他位取0，故很
+  容易可以想到让0x00000001左移31位得到结果。
+  */
   int result = 1;
   result = result << 31;
   return result;
@@ -205,6 +221,17 @@ int tmin(void)
  */
 int isTmax(int x)
 {
+  /*
+  思路：
+  本题的关键在于观察Tmax与其他值有什么不同，我个人的发现是
+  Tmax^(Tmax+1)==0xffffffff。然而具有该特点的还有-1，故之
+  后还需要想办法排除 -1 的干扰。而对于0xffffffff，将其与自
+  身取异或可以得到0。故下面先构造一个all_bits==0xffffffff，
+  然后通过all_bits ^ (x ^ (x_add_1))来检查x是否为Tmax或-1。
+  之后的 ...|(!x_add_1))则排除了-1的干扰。最后的取反运算则
+  将整个式子的值映射到0和1。注：后面还有很多在最后进行取反运
+  算的案例，皆为将上述作用，不再赘述。
+  */
   int all_bits = 1;
   int x_add_1 = x + 1;
   all_bits = ~all_bits + 1;
@@ -220,8 +247,16 @@ int isTmax(int x)
  */
 int allOddBits(int x)
 {
+  /*
+  思路：
+  对于本题首先应该构造出0xAAAAAAAA，然而只能用255以内的常量，
+  考虑到要使操作最少，故取常量为170并执行以下的移位操作，之后
+  只需要检查x对应于temp为1的位是否也为1，即(temp & x) ^ temp
+  操作。
+  */
   int temp = 170;
-  temp = temp | (temp << 8) | (temp << 16) | (temp << 24);
+  temp = temp | (temp << 8) ;
+  temp = temp | (temp << 16);
   return !((temp & x) ^ temp);
 }
 /*
@@ -233,6 +268,10 @@ int allOddBits(int x)
  */
 int negate(int x)
 {
+  /*
+  思路：
+  通过对于int型补码的观察即可得到取负操作即为取反加一。
+  */
   return (~x + 1);
 }
 // 3
@@ -247,11 +286,21 @@ int negate(int x)
  */
 int isAsciiDigit(int x)
 {
+  /*
+  思路：
+  本题的关键在于实现比较操作，想到可以将比较操作转化为一个减法
+  和检查一个数是否为非负的操作。x-min即x + (~min + 1)，同理
+  max-x即max + (~x + 1)。若x满足条件则：
+  式子~((~(x + (~min + 1))) & (~(max + (~x + 1))))最高位为0。
+  该式子如此复杂是因为考虑到了x为正时溢出的情况，保证x为正且溢出时
+  式子最高位为1。而右面的式子...| (x)则排除了负数的干扰。而最后的
+  移位加一以及取反操作只是对于302行result的最高位的检查。
+  */
   int min = 48;
   int max = 57;
   int result;
-  result = (~((~(x + (~min + 1))) & (~(max + (~x + 1))))) | (x);
-  result = (result >> 31) + 1;
+  result = (~((~(x + (~min + 1))) & (~(max + (~x + 1))))) | (x);//仅仅将最高位作为检查条件
+  result = (result >> 31) + 1;//检查最高位
   return result;
 }
 /*
@@ -263,6 +312,16 @@ int isAsciiDigit(int x)
  */
 int conditional(int x, int y, int z)
 {
+  /*
+  思路：
+  先通过两次取反运算和一次取负运算将x转化为：
+  1.当x!=0时有turn==0x00000000
+  2.当x==0时有turn==0xffffffff
+  而这里的turn意为转换，
+  1.当turn==0x00000000时，有0^z==z;
+  2.当turn==0xffffffff时，有(y^z)^z==y;
+  从而实现了式子的值在两个数之间转换的效果。
+  */
   int turn = !(!x);
   turn = ~turn + 1;
   return ((turn & (y ^ z)) ^ z);
@@ -276,9 +335,22 @@ int conditional(int x, int y, int z)
  */
 int isLessOrEqual(int x, int y)
 {
+  /*
+  思路：
+  要比较两个数的大小并不容易，但是检查一个数是否为非负却
+  非常容易，只需要检查最高位即可。故可以将x<=y转化为
+  y-x>=0。而y-x即y + (~x+1)。然而此时又存在了溢出的
+  问题，故需要排除一些情况。注意到当x与y不同号时才有可
+  能出现溢出，故用(~(y+(~x+1))) & (~(x^y))来保证当x与y
+  同号即不出现溢出的情况下上面式子能给出正确的结果。之后
+  再补充上x与y不同号时的情况，注意到当y为正且x为负时式子
+  的值应该为1，故有后面的...| ((~y) & (x))。这样一来整个
+  式子就可以给出正确的结果了。而最后的移位加一以及取反操作
+  只是对于349行result的最高位的检查。
+  */
   int result;
-  result = ((~(y + (~x + 1))) & (~(x ^ y))) | ((~y) & (x));
-  result = !((result >> 31) + 1);
+  result = ((~(y + (~x + 1))) & (~(x ^ y))) | ((~y) & (x));//仅仅用最高位作为检查条件
+  result = !((result >> 31) + 1);//检查最高位
   return result;
 }
 // 4
@@ -292,9 +364,18 @@ int isLessOrEqual(int x, int y)
  */
 int logicalNeg(int x)
 {
+  /*
+  思路：
+  逻辑非即当x==0时返回0，当x!=0时返回1。
+  此时关键在于观察0x00000000的特征。而
+  0最显著的特征便是其取负后为其本身。但
+  由于补码的特殊性，0x80000000也具有同
+  样的特征，故需要再对x首位为1的情形进行
+  排除。即操作result = result | x;
+  */
   int result = (~x + 1) ^ x;
-  result = result | x;
-  result = ((result >> 31) + 1);
+  result = result | x;//排除0x80000000的情形
+  result = ((result >> 31) + 1);//检查最高位
   return result;
 }
 /* howManyBits - return the minimum number of bits required to represent x in
@@ -311,15 +392,36 @@ int logicalNeg(int x)
  */
 int howManyBits(int x)
 {
-  int first_bit = x >> 31;
-  int temp = 7;
-  int result = 1;
-  int abs = (first_bit & ((~x) ^ x)) ^ x;
+  /*
+  思路：
+  通过下面获取abs的操作将上述问题转化为求abs最高位的位置坐标
+  由于只能进行位运算，故要找到最高位很困难。在这里我通过填充
+  最高位之后的所有位都为1再进行计数整个数的1的数量来获取最高
+  位的位置。然而这样做的话就要对32位都进行检查，如何节省操作
+  又成了难题。首先注意到填充通过指数递增的形式是最省操作的，
+  然后想到每次检查1位的话要32次，而每次检查2位只用16次，每次
+  检查3位只用11次。经过不断优化最终找到了每次检查3位的操作，
+  将总的操作优化到了80。
+  注：第一次找到了100多个操作的方法，是用每次检查1位。然后又
+  开始找每次检查2位的编码方法，虽然找到了编码方法，但最终要用
+  94个操作，还是不行。又开始探索每次检查3位的编码方法，找了很
+  久终于找到了，如下代码所示，这一次把操作直接减小到了80。然而
+  之后去找更高位的时候发现也很困难，最后也是考虑到不能一直耗在
+  这题上，就没再进行探索。
+  */
+  int first_bit = x >> 31;//提取x的最高位，此时应注意是算术右移。
+  int temp = 7;//0x00000007
+  int result = 1;//可以看做一个计数器
+  int abs = (first_bit & ((~x) ^ x)) ^ x;//为负则取反，为正则不变。
+
+  //进行位填充，将最高位之后的位全部填充上0，此处用指数递增的方式减少操作。
   abs = (abs) | (abs >> 1);
   abs = (abs) | (abs >> 2);
   abs = (abs) | (abs >> 4);
   abs = (abs) | (abs >> 8);
   abs = (abs) | (abs >> 16);
+
+  //每次检查3位中1的数量。
   result = result + ((((abs & temp) + 5) >> 2) & abs);
   abs = abs >> 3;
   result = result + ((((abs & temp) + 5) >> 2) & abs);
@@ -357,33 +459,34 @@ int howManyBits(int x)
  */
 unsigned floatScale2(unsigned uf)
 {
-  unsigned ninth_bit = 1 << 23;
-  unsigned tenth_bit = ninth_bit >> 1;
-  unsigned _1_to_9_bits = 4286578688;
-  unsigned test_uf_exp = uf >> 23;
-  unsigned test_bit = 255;
-  unsigned test_bit_2 = 254;
-  unsigned frac_mult_2 = (_1_to_9_bits & uf) | ((~_1_to_9_bits) & (uf << 1));
+  /*
+  思路：
+  首先排除掉NaN的uf，之后对于规格化的uf，要使其乘以2，只需要调整
+  阶码位，让阶码位加一即可。然后对于非规格化的uf，要使其乘以2需要
+  注意到非规格数会溢出到规格化数的情况。若小数位左移1位不会溢出，
+  那么直接让其他位不变，调整小数位即可。若溢出到规格化数，在进行小
+  数位左移1位且其他位不变的操作之后还需要设置阶码值为1。
+  */
+  unsigned ninth_bit = 1 << 23;//0x00800000
+  unsigned tenth_bit = ninth_bit >> 1;//0x00400000
+  unsigned _1_to_9_bits = 4286578688;//0xff800000
+  unsigned test_uf_exp = uf >> 23;//找exp的8位并置于最右侧
+  unsigned test_bit = 255;//0x000000ff
+  unsigned test_bit_2 = 254;//0x000000fe
+  unsigned frac_mult_2 = (_1_to_9_bits & uf) | ((~_1_to_9_bits) & (uf << 1));//让小数位左移1位并保持其他位值不变
   if ((test_uf_exp & test_bit) ^ test_bit)
   {
-    if (test_uf_exp & test_bit) // nor
+    if (test_uf_exp & test_bit) // 规格化
     {
-      if ((test_uf_exp & test_bit_2) ^ test_bit_2) // exp_not_full
-      {
-        return uf + ninth_bit;
-      }
-      else // exp_full
-      {
-        return uf + ninth_bit;
-      }
+      return uf + ninth_bit;//阶码位加1
     }
-    else // unnor
+    else // 非规格化
     {
-      if (tenth_bit & uf) // overflow
+      if (tenth_bit & uf) // 小数位左移1位会溢出
       {
-        return frac_mult_2 | ninth_bit;
+        return frac_mult_2 | ninth_bit;//让阶码位为1
       }
-      else // not_overflow
+      else // 小数位左移1位不会溢出
       {
         return frac_mult_2;
       }
@@ -408,51 +511,59 @@ unsigned floatScale2(unsigned uf)
  */
 int floatFloat2Int(unsigned uf)
 {
-  unsigned _9_bit = 8388608;
-  unsigned _9_to_32_bits = 16777215;
-  unsigned exp = uf >> 23;
-  unsigned last_8_bits = 255;
-  unsigned _M_ = (_9_bit | uf) & _9_to_32_bits;
-  unsigned _s_ = 2147483648;
-  unsigned _E_;
+  /*
+  思路：
+  由于浮点数不同位有不同的解释方式，此外还存在规格化、非规格化、
+  以及NaN的区别，故需要分类进行解码。首先排除NaN，然后由于非规
+  格化数绝对值都小于1，也很好排除。最后在规格化中，先排除掉阶码
+  位过大过小的情况，留下可以表示的情况，再根据浮点数的表示规则
+  进行操作即可。
+  */
+  unsigned _9_bit = 8388608;//0x00800000
+  unsigned _9_to_32_bits = 16777215;//0x00ffffff
+  unsigned exp = uf >> 23;//取exp位并置于最右侧
+  unsigned last_8_bits = 255;//0x000000ff
+  unsigned _M_ = (_9_bit | uf) & _9_to_32_bits;//小数位的值
+  unsigned _s_ = 2147483648;//符号位的值
+  unsigned _E_;//exp位的值
   unsigned result;
-  exp = (exp & last_8_bits);
-  _s_ = (_s_ & uf) >> 31;
+  exp = (exp & last_8_bits);//取exp位并置于最右侧并使其他位为0
+  _s_ = (_s_ & uf) >> 31;//取符号位，注意是算术右移
 
   if (exp ^ last_8_bits)
   {
-    if (exp) // nor
+    if (exp) // 规格化
     {
-      if (exp > 157)
+      if (exp > 157)//阶码位过大，超过int可以表示的范围
       {
         return -2147483648;
       }
-      else if (exp < 127)
+      else if (exp < 127)//阶码位小于0，结果的绝对值必然小于1，故直接置0
       {
         return 0;
       }
-      else
+      else//阶码位合适，在int型可以表示的范围内
       {
         _E_ = exp - 127;
-        if (_E_ >= 23)
+        if (_E_ >= 23)//需要将小数位左移的情况
         {
           result = _M_ << (_E_ - 23);
         }
-        else
+        else//需要将小数位右移的情况
         {
           result = _M_ >> (23 - _E_);
         }
-        if (_s_)
+        if (_s_)//符号位不为0，结果取负
         {
           return (~result + 1);
         }
-        else
+        else//符号位为0，结果不变
         {
           return result;
         }
       }
     }
-    else // unnor
+    else // 非规格化
     {
       return 0;
     }
@@ -477,23 +588,31 @@ int floatFloat2Int(unsigned uf)
  */
 unsigned floatPower2(int x)
 {
-  // yibianguo!!!
+  /*
+  此代码一遍过！
+  思路：由于浮点数表示的范围比较容易确定，故可以先排除较大的和较小的数，
+  直接通过比较即可。对于非规格化的数，由于返回的是2的x次方，故最后的位
+  级表示只有最后的23位里面含有一个1，且从左到右依次为2^(-128),2^(-129)...
+  故构造了一个_9_bit来进行移位得到最后的值；对于规格化的数，由于小数位和
+  符号位均为0，故只需要让x+127就得到了浮点exp表示的位。之后再左移23位即
+  为浮点数表示的2^x的值。
+  */
   int _E_ = x;
-  int INF = 2139095040;
-  int _9_bit = 8388608;
-  if (_E_ > 128) //+INF
+  int INF = 2139095040;//定义正无穷
+  int _9_bit = 8388608;//0x00800000
+  if (_E_ > 128) //过大
   {
     return INF;
   }
-  else if (_E_ < -150) // denorm
+  else if (_E_ < -150) //过小
   {
     return 0;
   }
-  else if ((_E_ >= -150) && (_E_ < -127)) // unnor
+  else if ((_E_ >= -150) && (_E_ < -127)) //在非规格化表示范围内
   {
     return (_9_bit >> (-127 - _E_));
   }
-  else // nor
+  else //在规格化表示范围内
   {
     return ((_E_ + 127) << 23);
   }
@@ -501,6 +620,11 @@ unsigned floatPower2(int x)
 /*
 unsigned floatPower2(int x)
 {
+  //注：一开始看错题目了以为要实现2*x。
+  //    下面的代码实现了和上面一个题目相反的
+  //    操作，即int转换成float。代码没有测试
+  //    过，但大致思路应该是对的。在实现完之后
+  //    才发现看错题目了......
   int _s_ = -2147483648;
   _s_ = _s_ & x;
   int all_bit = -1;
