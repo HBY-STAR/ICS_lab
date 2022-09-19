@@ -230,7 +230,7 @@ int isTmax(int x)
   然后通过all_bits ^ (x ^ (x_add_1))来检查x是否为Tmax或-1。
   之后的 ...|(!x_add_1))则排除了-1的干扰。最后的取反运算则
   将整个式子的值映射到0和1。注：后面还有很多在最后进行取反运
-  算的案例，皆为将上述作用，不再赘述。
+  算的案例，皆为上述作用，不再赘述。
   */
   int all_bits = 1;
   int x_add_1 = x + 1;
@@ -255,7 +255,7 @@ int allOddBits(int x)
   操作。
   */
   int temp = 170;
-  temp = temp | (temp << 8) ;
+  temp = temp | (temp << 8);
   temp = temp | (temp << 16);
   return !((temp & x) ^ temp);
 }
@@ -299,8 +299,8 @@ int isAsciiDigit(int x)
   int min = 48;
   int max = 57;
   int result;
-  result = (~((~(x + (~min + 1))) & (~(max + (~x + 1))))) | (x);//仅仅将最高位作为检查条件
-  result = (result >> 31) + 1;//检查最高位
+  result = (~((~(x + (~min + 1))) & (~(max + (~x + 1))))) | (x); //仅仅将最高位作为检查条件
+  result = (result >> 31) + 1;                                   //检查最高位
   return result;
 }
 /*
@@ -349,8 +349,8 @@ int isLessOrEqual(int x, int y)
   只是对于349行result的最高位的检查。
   */
   int result;
-  result = ((~(y + (~x + 1))) & (~(x ^ y))) | ((~y) & (x));//仅仅用最高位作为检查条件
-  result = !((result >> 31) + 1);//检查最高位
+  result = ((~(y + (~x + 1))) & (~(x ^ y))) | ((~y) & (x)); //仅仅用最高位作为检查条件
+  result = !((result >> 31) + 1);                           //检查最高位
   return result;
 }
 // 4
@@ -374,8 +374,8 @@ int logicalNeg(int x)
   排除。即操作result = result | x;
   */
   int result = (~x + 1) ^ x;
-  result = result | x;//排除0x80000000的情形
-  result = ((result >> 31) + 1);//检查最高位
+  result = result | x;           //排除0x80000000的情形
+  result = ((result >> 31) + 1); //检查最高位
   return result;
 }
 /* howManyBits - return the minimum number of bits required to represent x in
@@ -409,10 +409,10 @@ int howManyBits(int x)
   之后去找更高位的时候发现也很困难，最后也是考虑到不能一直耗在
   这题上，就没再进行探索。
   */
-  int first_bit = x >> 31;//提取x的最高位，此时应注意是算术右移。
-  int temp = 7;//0x00000007
-  int result = 1;//可以看做一个计数器
-  int abs = (first_bit & ((~x) ^ x)) ^ x;//为负则取反，为正则不变。
+  int first_bit = x >> 31;                //提取x的最高位，此时应注意是算术右移。
+  int temp = 7;                           // 0x00000007
+  int result = 1;                         //可以看做一个计数器
+  int abs = (first_bit & ((~x) ^ x)) ^ x; //为负则取反，为正则不变。
 
   //进行位填充，将最高位之后的位全部填充上0，此处用指数递增的方式减少操作。
   abs = (abs) | (abs >> 1);
@@ -467,24 +467,24 @@ unsigned floatScale2(unsigned uf)
   那么直接让其他位不变，调整小数位即可。若溢出到规格化数，在进行小
   数位左移1位且其他位不变的操作之后还需要设置阶码值为1。
   */
-  unsigned ninth_bit = 1 << 23;//0x00800000
-  unsigned tenth_bit = ninth_bit >> 1;//0x00400000
-  unsigned _1_to_9_bits = 4286578688;//0xff800000
-  unsigned test_uf_exp = uf >> 23;//找exp的8位并置于最右侧
-  unsigned test_bit = 255;//0x000000ff
-  unsigned test_bit_2 = 254;//0x000000fe
-  unsigned frac_mult_2 = (_1_to_9_bits & uf) | ((~_1_to_9_bits) & (uf << 1));//让小数位左移1位并保持其他位值不变
+  unsigned ninth_bit = 1 << 23;                                               // 0x00800000
+  unsigned tenth_bit = ninth_bit >> 1;                                        // 0x00400000
+  unsigned _1_to_9_bits = 4286578688;                                         // 0xff800000
+  unsigned test_uf_exp = uf >> 23;                                            //找exp的8位并置于最右侧
+  unsigned test_bit = 255;                                                    // 0x000000ff
+  unsigned test_bit_2 = 254;                                                  // 0x000000fe
+  unsigned frac_mult_2 = (_1_to_9_bits & uf) | ((~_1_to_9_bits) & (uf << 1)); //让小数位左移1位并保持其他位值不变
   if ((test_uf_exp & test_bit) ^ test_bit)
   {
     if (test_uf_exp & test_bit) // 规格化
     {
-      return uf + ninth_bit;//阶码位加1
+      return uf + ninth_bit; //阶码位加1
     }
     else // 非规格化
     {
       if (tenth_bit & uf) // 小数位左移1位会溢出
       {
-        return frac_mult_2 | ninth_bit;//让阶码位为1
+        return frac_mult_2 | ninth_bit; //让阶码位为1
       }
       else // 小数位左移1位不会溢出
       {
@@ -519,45 +519,45 @@ int floatFloat2Int(unsigned uf)
   位过大过小的情况，留下可以表示的情况，再根据浮点数的表示规则
   进行操作即可。
   */
-  unsigned _9_bit = 8388608;//0x00800000
-  unsigned _9_to_32_bits = 16777215;//0x00ffffff
-  unsigned exp = uf >> 23;//取exp位并置于最右侧
-  unsigned last_8_bits = 255;//0x000000ff
-  unsigned _M_ = (_9_bit | uf) & _9_to_32_bits;//小数位的值
-  unsigned _s_ = 2147483648;//符号位的值
-  unsigned _E_;//exp位的值
+  unsigned _9_bit = 8388608;                    // 0x00800000
+  unsigned _9_to_32_bits = 16777215;            // 0x00ffffff
+  unsigned exp = uf >> 23;                      //取exp位并置于最右侧
+  unsigned last_8_bits = 255;                   // 0x000000ff
+  unsigned _M_ = (_9_bit | uf) & _9_to_32_bits; //小数位的值
+  unsigned _s_ = 2147483648;                    //符号位的值
+  unsigned _E_;                                 // exp位的值
   unsigned result;
-  exp = (exp & last_8_bits);//取exp位并置于最右侧并使其他位为0
-  _s_ = (_s_ & uf) >> 31;//取符号位，注意是算术右移
+  exp = (exp & last_8_bits); //取exp位并置于最右侧并使其他位为0
+  _s_ = (_s_ & uf) >> 31;    //取符号位，注意是算术右移
 
   if (exp ^ last_8_bits)
   {
     if (exp) // 规格化
     {
-      if (exp > 157)//阶码位过大，超过int可以表示的范围
+      if (exp > 157) //阶码位过大，超过int可以表示的范围
       {
         return -2147483648;
       }
-      else if (exp < 127)//阶码位小于0，结果的绝对值必然小于1，故直接置0
+      else if (exp < 127) //阶码位小于0，结果的绝对值必然小于1，故直接置0
       {
         return 0;
       }
-      else//阶码位合适，在int型可以表示的范围内
+      else //阶码位合适，在int型可以表示的范围内
       {
         _E_ = exp - 127;
-        if (_E_ >= 23)//需要将小数位左移的情况
+        if (_E_ >= 23) //需要将小数位左移的情况
         {
           result = _M_ << (_E_ - 23);
         }
-        else//需要将小数位右移的情况
+        else //需要将小数位右移的情况
         {
           result = _M_ >> (23 - _E_);
         }
-        if (_s_)//符号位不为0，结果取负
+        if (_s_) //符号位不为0，结果取负
         {
           return (~result + 1);
         }
-        else//符号位为0，结果不变
+        else //符号位为0，结果不变
         {
           return result;
         }
@@ -598,9 +598,9 @@ unsigned floatPower2(int x)
   为浮点数表示的2^x的值。
   */
   int _E_ = x;
-  int INF = 2139095040;//定义正无穷
-  int _9_bit = 8388608;//0x00800000
-  if (_E_ > 128) //过大
+  int INF = 2139095040; //定义正无穷
+  int _9_bit = 8388608; // 0x00800000
+  if (_E_ > 128)        //过大
   {
     return INF;
   }
