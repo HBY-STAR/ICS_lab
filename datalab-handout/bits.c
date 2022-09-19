@@ -446,11 +446,11 @@ int floatFloat2Int(unsigned uf)
         }
         if (_s_)
         {
-          return result;
+          return (~result + 1);
         }
         else
         {
-          return (~result + 1);
+          return result;
         }
       }
     }
