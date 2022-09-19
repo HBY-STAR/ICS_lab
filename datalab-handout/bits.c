@@ -205,12 +205,10 @@ int tmin(void)
  */
 int isTmax(int x)
 {
-  int result;
-  int check_first_bit = 1;
-  check_first_bit = check_first_bit << 31;
-  result = ((x + 1) ^ (~x)) | (x & check_first_bit);
-  result = !result;
-  return result;
+  int all_bits = 1;
+  int x_add_1 = x + 1;
+  all_bits = ~all_bits + 1;
+  return !((all_bits ^ (x ^ (x_add_1))) | (!x_add_1));
 }
 /*
  * allOddBits - return 1 if all odd-numbered bits in word set to 1
