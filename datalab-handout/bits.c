@@ -359,7 +359,42 @@ int howManyBits(int x)
  */
 unsigned floatScale2(unsigned uf)
 {
-  return 2;
+  unsigned ninth_bit = 1 << 23;
+  unsigned tenth_bit = ninth_bit >> 1;
+  unsigned _1_to_9_bits = 4286578688;
+  unsigned test_uf_exp = uf >> 23;
+  unsigned test_bit = 255;
+  unsigned test_bit_2 = 254;
+  unsigned frac_mult_2 = (_1_to_9_bits & uf) | ((~_1_to_9_bits) & (uf << 1));
+  if ((test_uf_exp & test_bit) ^ test_bit)
+  {
+    if (test_uf_exp & test_bit) // nor
+    {
+      if ((test_uf_exp & test_bit_2) ^ test_bit_2) // exp_not_full
+      {
+        return uf + ninth_bit;
+      }
+      else // exp_full
+      {
+        return uf + ninth_bit;
+      }
+    }
+    else // unnor
+    {
+      if (tenth_bit & uf) // overflow
+      {
+        return frac_mult_2 | ninth_bit;
+      }
+      else // not_overflow
+      {
+        return frac_mult_2;
+      }
+    }
+  }
+  else // NaN
+  {
+    return uf;
+  }
 }
 /*
  * floatFloat2Int - Return bit-level equivalent of expression (int) f
