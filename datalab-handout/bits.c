@@ -410,6 +410,59 @@ unsigned floatScale2(unsigned uf)
  */
 int floatFloat2Int(unsigned uf)
 {
+  unsigned _9_bit = 8388608;
+  unsigned _9_to_32_bits = 16777215;
+  unsigned exp = uf >> 23;
+  unsigned last_8_bits = 255;
+  unsigned _M_ = (_9_bit | uf) & _9_to_32_bits;
+  unsigned _s_ = 2147483648;
+  unsigned _E_;
+  unsigned result;
+  exp = (exp & last_8_bits);
+  _s_ = (_s_ & uf) >> 31;
+
+  if (exp ^ last_8_bits)
+  {
+    if (exp) // nor
+    {
+      if (exp > 157)
+      {
+        return -2147483648;
+      }
+      else if (exp < 127)
+      {
+        return 0;
+      }
+      else
+      {
+        _E_ = exp - 127;
+        if (_E_ >= 23)
+        {
+          result = _M_ << (_E_ - 23);
+        }
+        else
+        {
+          result = _M_ >> (23 - _E_);
+        }
+        if (_s_)
+        {
+          return result;
+        }
+        else
+        {
+          return (~result + 1);
+        }
+      }
+    }
+    else // unnor
+    {
+      return 0;
+    }
+  }
+  else // NaN
+  {
+    return -2147483648;
+  }
 }
 /*
  * floatPower2 - Return bit-level equivalent of the expression 2.0^x
