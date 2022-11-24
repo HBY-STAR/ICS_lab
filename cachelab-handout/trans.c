@@ -22,14 +22,22 @@ int is_transpose(int M, int N, int A[N][M], int B[M][N]);
 char transpose_submit_desc[] = "Transpose submission";
 void transpose_submit(int M, int N, int A[N][M], int B[M][N])
 {
+    // M==32,N==32
     if (M == 32 && N == 32)
     {
+        //共11个变量
+        int i, j, k;
         int temp0, temp1, temp2, temp3, temp4, temp5, temp6, temp7;
-        for (int i = 0; i < 32; i += 8)
+
+        //进行分块处理，分成8×8的块
+        //这里为了处理对角线上的8×8块A和B数组同时占用缓存导致大量不命中的情况
+        //故一次读取A中的一行8个数据并存入临时变量中，这样A每块只有一次冷不命中
+        //而B对角线上的块部分有两次不命中，其他位置的块也是只有一次冷不命中，已达到要求
+        for (i = 0; i < 32; i += 8)
         {
-            for (int j = 0; j < 32; j += 8)
+            for (j = 0; j < 32; j += 8)
             {
-                for (int k = i; k < i + 8; k++)
+                for (k = i; k < i + 8; k++)
                 {
                     temp0 = A[k][j];
                     temp1 = A[k][j + 1];
@@ -52,16 +60,28 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N])
             }
         }
     }
+
+    // M==64,N==64
     if (M == 64 && N == 64)
     {
+        //共11个变量
         int temp0, temp1, temp2, temp3, temp4, temp5, temp6, temp7;
         int i, j, k;
+
+        //这里也是尝试分块，8×8的块miss太多，不可行
+        //4×4的分块虽然减少了很多miss，但仍达不到要求
+        //经分析得4×4的块每次读取只利用了cache的一半空间，
+        //故从此方面入手，考虑分成8×8的块以充分利用缓存
+        //空间，但在块内部用4×4的方法处理以减少miss
+        //下面是一种方案
         for (i = 0; i < 64; i += 8)
         {
             for (j = 0; j < 64; j += 8)
             {
+                //读取8×8的块中的前四行
                 for (k = i; k < i + 4; k++)
                 {
+                    //将A中一整行8个数据存入临时变量中
                     temp0 = A[k][j];
                     temp1 = A[k][j + 1];
                     temp2 = A[k][j + 2];
@@ -71,40 +91,51 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N])
                     temp6 = A[k][j + 6];
                     temp7 = A[k][j + 7];
 
+                    //将上面A的一行中前四个数据存放在B中正确的位置
                     B[j][k] = temp0;
                     B[j + 1][k] = temp1;
                     B[j + 2][k] = temp2;
                     B[j + 3][k] = temp3;
 
+                    //A的后四个数据暂时存放在B在cache中的其余空闲位置
                     B[j][k + 4] = temp4;
                     B[j + 1][k + 4] = temp5;
                     B[j + 2][k + 4] = temp6;
                     B[j + 3][k + 4] = temp7;
                 }
+
+                //读取A中后四行的前四列
                 for (k = j; k < j + 4; k++)
                 {
+                    //读取A后四行的一列4个数据
                     temp0 = A[i + 4][k];
                     temp1 = A[i + 5][k];
                     temp2 = A[i + 6][k];
                     temp3 = A[i + 7][k];
 
+                    //读取之前存放在B的空闲位置的数据
                     temp4 = B[k][i + 4];
                     temp5 = B[k][i + 5];
                     temp6 = B[k][i + 6];
                     temp7 = B[k][i + 7];
 
+                    //将上述A的后四行的一列数据放入正确的位置
                     B[k][i + 4] = temp0;
                     B[k][i + 5] = temp1;
                     B[k][i + 6] = temp2;
                     B[k][i + 7] = temp3;
 
+                    //将之前存放在B的空闲位置的数据存放在B的正确的位置
                     B[k + 4][i] = temp4;
                     B[k + 4][i + 1] = temp5;
                     B[k + 4][i + 2] = temp6;
                     B[k + 4][i + 3] = temp7;
                 }
+
+                //读取A中后四行的后四列
+                //并直接将其放到B中的正确位置
                 for (k = i + 4; k < i + 8; k++)
-                {
+                { 
                     temp0 = A[k][j + 4];
                     temp1 = A[k][j + 5];
                     temp2 = A[k][j + 6];
@@ -118,9 +149,14 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N])
             }
         }
     }
+
+    // M==62,N==67
     if (M == 61 && N == 67)
     {
+        //共4个变量
         int i, j, k, l;
+
+        //直接进行分块处理，分成17×17的块便已达到要求
         for (i = 0; i < 61; i += 17)
         {
             for (j = 0; j < 67; j += 17)

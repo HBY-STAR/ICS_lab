@@ -51,6 +51,7 @@ int get_tag(unsigned long address, int s, int b)
     return address >> (s + b);
 }
 
+//创建缓存，为sets申请空间
 cache calloc_sets(int s, int E, int b)
 {
     int set_num = (1 << s);
@@ -63,6 +64,7 @@ cache calloc_sets(int s, int E, int b)
     return result;
 }
 
+//释放sets的空间
 void free_sets(cache *c)
 {
     for (int i = 0; i < c->set_num; i++)
@@ -74,6 +76,7 @@ void free_sets(cache *c)
     c->sets = NULL;
 }
 
+//通过读取文件中的一行来获取一个操作并返回
 operation get_opt(FILE *fp)
 {
     char buf[100]; //缓冲区大小为100
@@ -84,6 +87,7 @@ operation get_opt(FILE *fp)
     return opt;
 }
 
+//获取命令行参数
 void get_argvs(int argc, char **argvs, int *s, int *E, int *b, FILE **fp, bool *isDisplay)
 {
     int opt;
@@ -120,6 +124,7 @@ void get_argvs(int argc, char **argvs, int *s, int *E, int *b, FILE **fp, bool *
     }
 }
 
+//进行load或store执行的操作，这里二者操作相同
 void load_store(cache *cach, operation *opt, bool isDisplay, bool by_modify)
 {
     if (isDisplay && !by_modify)
@@ -127,6 +132,7 @@ void load_store(cache *cach, operation *opt, bool isDisplay, bool by_modify)
         printf("%c %lx,%d ", opt->opt, opt->address, opt->size);
     }
 
+    //获取组索引和标记
     int set_index = get_set_index(opt->address, cach->s, cach->b);
     int tag = get_tag(opt->address, cach->s, cach->b);
     line *right_line = NULL;
@@ -185,27 +191,33 @@ void load_store(cache *cach, operation *opt, bool isDisplay, bool by_modify)
                 }
             }
         }
-        right_line->tag=tag;
+        right_line->tag=tag;//更新标记
     }
 
     if (isDisplay && !by_modify)
     {
         printf("\n");
     }
+    //更新时间
     right_line->last_time = All_time;
     All_time++;
 }
 
+//进行modify执行的操作，一次modify即一次load加上一次store
 void modify(cache *cach, operation *opt, bool isDisplay)
 {
     if (isDisplay)
     {
         printf("%c %lx,%d ", opt->opt, opt->address, opt->size);
     }
+
+    //执行一次load
     opt->opt = 'L';
     load_store(cach, opt, isDisplay, true);
+    //再执行一次store
     opt->opt = 'S';
     load_store(cach, opt, isDisplay, true);
+
     if (isDisplay)
     {
         printf("\n");
@@ -214,18 +226,22 @@ void modify(cache *cach, operation *opt, bool isDisplay)
 
 int main(int argc, char **argvs)
 {
+    //变量初始化
     hit_count = 0;
     miss_count = 0;
     eviction_count = 0;
     FILE *fp = NULL;
     bool isDisplay = false;
     int s = 0, E = 0, b = 0;
-
-    get_argvs(argc, argvs, &s, &E, &b, &fp, &isDisplay);
-
-    cache cach = calloc_sets(s, E, b);
     operation opt;
 
+    //获取命令行参数
+    get_argvs(argc, argvs, &s, &E, &b, &fp, &isDisplay);
+
+    //根据读取的s，E，b创建缓存
+    cache cach = calloc_sets(s, E, b);
+    
+    //处理操作
     while ((opt = get_opt(fp)).opt)
     {
         switch (opt.opt)
@@ -244,6 +260,7 @@ int main(int argc, char **argvs)
         }
     }
 
+    //进行收尾
     fclose(fp);
     free_sets(&cach);
     printSummary(hit_count, miss_count, eviction_count);
