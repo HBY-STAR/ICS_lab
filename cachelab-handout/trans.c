@@ -52,9 +52,88 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N])
             }
         }
     }
-    if(M==64&&N==64)
+    if (M == 64 && N == 64)
     {
-        
+        int temp0, temp1, temp2, temp3, temp4, temp5, temp6, temp7;
+        int i, j, k;
+        for (i = 0; i < 64; i += 8)
+        {
+            for (j = 0; j < 64; j += 8)
+            {
+                for (k = i; k < i + 4; k++)
+                {
+                    temp0 = A[k][j];
+                    temp1 = A[k][j + 1];
+                    temp2 = A[k][j + 2];
+                    temp3 = A[k][j + 3];
+                    temp4 = A[k][j + 4];
+                    temp5 = A[k][j + 5];
+                    temp6 = A[k][j + 6];
+                    temp7 = A[k][j + 7];
+
+                    B[j][k] = temp0;
+                    B[j + 1][k] = temp1;
+                    B[j + 2][k] = temp2;
+                    B[j + 3][k] = temp3;
+
+                    B[j][k + 4] = temp4;
+                    B[j + 1][k + 4] = temp5;
+                    B[j + 2][k + 4] = temp6;
+                    B[j + 3][k + 4] = temp7;
+                }
+                for (k = j; k < j + 4; k++)
+                {
+                    temp0 = A[i + 4][k];
+                    temp1 = A[i + 5][k];
+                    temp2 = A[i + 6][k];
+                    temp3 = A[i + 7][k];
+
+                    temp4 = B[k][i + 4];
+                    temp5 = B[k][i + 5];
+                    temp6 = B[k][i + 6];
+                    temp7 = B[k][i + 7];
+
+                    B[k][i + 4] = temp0;
+                    B[k][i + 5] = temp1;
+                    B[k][i + 6] = temp2;
+                    B[k][i + 7] = temp3;
+
+                    B[k + 4][i] = temp4;
+                    B[k + 4][i + 1] = temp5;
+                    B[k + 4][i + 2] = temp6;
+                    B[k + 4][i + 3] = temp7;
+                }
+                for (k = i + 4; k < i + 8; k++)
+                {
+                    temp0 = A[k][j + 4];
+                    temp1 = A[k][j + 5];
+                    temp2 = A[k][j + 6];
+                    temp3 = A[k][j + 7];
+
+                    B[j + 4][k] = temp0;
+                    B[j + 5][k] = temp1;
+                    B[j + 6][k] = temp2;
+                    B[j + 7][k] = temp3;
+                }
+            }
+        }
+    }
+    if (M == 61 && N == 67)
+    {
+        int i, j, k, l;
+        for (i = 0; i < 61; i += 17)
+        {
+            for (j = 0; j < 67; j += 17)
+            {
+                for (k = i; k < 61 && k < i + 17; k++)
+                {
+                    for (l = j; l < 67 && l < j + 17; l++)
+                    {
+                        B[k][l] = A[l][k];
+                    }
+                }
+            }
+        }
     }
 }
 
