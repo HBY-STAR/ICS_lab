@@ -5,6 +5,11 @@
 #include <string.h>
 #include <getopt.h>
 
+/*
+学号：21302010042
+姓名：侯斌洋
+*/
+
 int hit_count = 0;
 int miss_count = 0;
 int eviction_count = 0;
@@ -13,9 +18,9 @@ int All_time = 0;
 //行
 typedef struct line
 {
-    bool isValid;
-    int tag;
-    int last_time;
+    bool isValid;  //有效位
+    int tag;       //标记位
+    int last_time; //上次访问时间
 } line;
 
 //组
@@ -171,7 +176,7 @@ void load_store(cache *cach, operation *opt, bool isDisplay, bool by_modify)
         }
         if (right_line) //若有空位
         {
-            right_line->isValid=true;
+            right_line->isValid = true;
         }
         else //若没有空位
         {
@@ -191,7 +196,7 @@ void load_store(cache *cach, operation *opt, bool isDisplay, bool by_modify)
                 }
             }
         }
-        right_line->tag=tag;//更新标记
+        right_line->tag = tag; //更新标记
     }
 
     if (isDisplay && !by_modify)
@@ -240,7 +245,7 @@ int main(int argc, char **argvs)
 
     //根据读取的s，E，b创建缓存
     cache cach = calloc_sets(s, E, b);
-    
+
     //处理操作
     while ((opt = get_opt(fp)).opt)
     {
